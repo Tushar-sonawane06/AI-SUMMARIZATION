@@ -17,7 +17,7 @@ CORS(app, origins=["https://aisummarization.netlify.app/"])
 # If you just want to allow ALL origins while testing, use: CORS(app)
 
 # Example API route
-@app.route("/api/data")
+@app.route("AIzaSyC7oU_iSJoYRVJhLsqVEy2E8GDGVx9WqbA")
 def get_data():
     return jsonify({
         "message": "Hello from Flask backend!",
@@ -29,30 +29,24 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
-
-
-app = Flask(__name__)
-
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# ---------------- Google API Setup ----------------
-# ⚡ Directly put your API key here
-GOOGLE_API_KEY = "AIzaSyBaljQZjcjUKUwVbT0tSody9AITPU429mc" 
+# Google Gemini AI Setup
+GOOGLE_API_KEY = "AIzaSyC7oU_iSJoYRVJhLsqVEy2E8GDGVx9WqbA"
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
-
 
 # ---------------- Helper Functions ----------------
 def extract_text_from_pdf(file_path):
     reader = PdfReader(file_path)
-    text_chunks = [page.extract_text().strip() for page in reader.pages if page.extract_text()]
-    return "\n\n".join(text_chunks)
+    return "\n\n".join([p.extract_text().strip() for p in reader.pages if p.extract_text()])
 
 def extract_text_from_docx(file_path):
     doc = docx.Document(file_path)
-    text_chunks = [para.text.strip() for para in doc.paragraphs if para.text.strip()]
-    return "\n\n".join(text_chunks)
+    return "\n\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
 
 def extract_text(file_path):
     ext = os.path.splitext(file_path)[1].lower()
@@ -67,33 +61,12 @@ def extract_text(file_path):
         raise ValueError("Unsupported file format. Use PDF, DOCX, or TXT.")
 
 def extract_citations(text):
-    citations_apa = re.findall(r'\([A-Za-z]+, \d{4}\)', text)
-    citations_num = re.findall(r'\[\d+\]', text)
-    return list(set(citations_apa + citations_num))
+    apa = re.findall(r'\([A-Za-z]+, \d{4}\)', text)
+    nums = re.findall(r'\[\d+\]', text)
+    return list(set(apa + nums))
 
 def summarize_with_gemini(text):
-    prompt = f'''Task: Summarize the following document into clear, concise bullet points. The document may be in PDF, DOCX, or TXT format.
-
-Requirements:
-
-Summarize all key information without losing meaning.
-
-Present the summary directly in bullet points, jumping straight to them.
-
-Include citations in author-year style at the end of each bullet where relevant.
-
-Normalize/format citations consistently, even if the original text is inconsistent.
-
-Ensure the summary is concise, refined, and usable for general purposes.
-
-Output format:
-
-Bullet points for key information.
-
-Citations included at the end of each bullet in parentheses (Author, Year).
-
-Avoid extra explanations or introductions.\n\n{text}'''
-    
+    prompt = f'''Summarize this document into concise bullet points with citations (Author, Year). Keep it clear and direct.\n\n{text}'''
     response = model.generate_content(prompt)
     return response.text if response else "Error: No response from Gemini."
 
@@ -104,26 +77,21 @@ def home():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    file = request.files.get("file")
-    if not file or file.filename == '':
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
-
     filename = file.filename
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(file_path)
-
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
     try:
-        text = extract_text(file_path)
+        text = extract_text(filepath)
         summary = summarize_with_gemini(text)
         citations = extract_citations(text)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    return jsonify({"filename": filename, "summary": summary, "citations": citations})
 
-    return jsonify({
-        "filename": filename,
-        "summary": summary,
-        "citations": citations
-    })
-
-if __name__ == "__main__":
+if _name_ == "_main_":
     app.run(debug=True)
