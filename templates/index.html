@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cyber AI Summarizer & Citation Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 <style>
+    
+
 body {
-    margin:0; font-family:'Orbitron',sans-serif; background:#0d0d0d; color:#00ffea; display:flex; flex-direction:column; min-height:100vh;
+    background:url(""); margin:0; font-family:'Orbitron',sans-serif; background:#0d0d0d; color:#00ffea; display:flex; flex-direction:column; min-height:100vh;
 }
 header, footer {
     text-align:center; padding:1rem; background:#111; border-bottom:1px solid #00ffea; box-shadow:0 2px 10px #00ffea33;
@@ -28,7 +33,17 @@ main.content {flex-grow:1; display:flex; justify-content:center; align-items:cen
 .btn:hover {background:#ff3399; transform:scale(1.05);}
 .result, .error {margin-top:20px; padding:1.5rem; border-radius:16px; text-align:left; max-height:300px; overflow-y:auto; font-family:'Orbitron', monospace; transition:0.5s; opacity:0; transform:translateY(20px);}
 .result.show, .error.show {opacity:1; transform:translateY(0);}
-.result {background:white;color:black; border-left:4px solid #00ffea;}
+.result 
+{
+    background:white;
+    color:black; 
+    font-family:'Orbitron',sans-serif;
+    border-left:4px solid #00ffea;
+    font-family: "Noto Sans", sans-serif;
+    font-optical-sizing: auto;
+  
+}
+
 .error {background:#ff005511; border-left:4px solid #ff0055;}
 ul {padding-left:20px;}
 .progress-bar {height:6px; background:#00ffea; width:0; margin-top:10px; border-radius:3px; transition:width 0.5s;}
@@ -87,7 +102,7 @@ function handleFile(file){
     let prog = 0;
     const interval = setInterval(()=>{prog+=10; progress.style.width=prog+"%"; if(prog>=100) clearInterval(interval);},100);
 
-    fetch("/upload",{method:"POST", body:formData})
+    fetch("http://127.0.0.1:5000/upload", { method: "POST", body: formData })
     .then(res=>res.json())
     .then(data=>{
         progress.style.width="100%";
