@@ -4,6 +4,31 @@ import re
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 import docx
+from flask import Flask, jsonify
+from flask_cors import CORS
+import os
+
+# Create Flask app
+app = Flask(__name__)
+
+# Enable CORS (so Netlify frontend can call this backend)
+CORS(app, origins=["https://aisummarization.netlify.app/"])  
+# 👆 replace with your actual Netlify URL
+# If you just want to allow ALL origins while testing, use: CORS(app)
+
+# Example API route
+@app.route("/api/data")
+def get_data():
+    return jsonify({
+        "message": "Hello from Flask backend!",
+        "status": "success"
+    })
+
+# Run the app (Render will auto-detect PORT)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
 
 
 app = Flask(__name__)

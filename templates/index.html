@@ -126,6 +126,15 @@ function handleFile(file){
         resultBox.style.display="none"; console.error(err);
     });
 }
+
+fetch("https://ai-summarization.onrender.com")
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // update your UI here
+  })
+  .catch(err => console.error(err));
+
 </script>
 
 </body>
