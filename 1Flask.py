@@ -17,7 +17,7 @@ CORS(app, origins=["https://aisummarization.netlify.app/"])
 # If you just want to allow ALL origins while testing, use: CORS(app)
 
 # Example API route
-@app.route("AIzaSyC7oU_iSJoYRVJhLsqVEy2E8GDGVx9WqbA")
+@app.route("/AIzaSyC7oU_iSJoYRVJhLsqVEy2E8GDGVx9WqbA")
 def get_data():
     return jsonify({
         "message": "Hello from Flask backend!",
