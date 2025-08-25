@@ -4,3 +4,7 @@ gunicorn
 google-generativeai
 PyPDF2
 python-docx
+docx
+jsonify
+CORS
+os
