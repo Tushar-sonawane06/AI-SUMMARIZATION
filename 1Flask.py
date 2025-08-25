@@ -93,5 +93,5 @@ def upload_file():
         return jsonify({"error": str(e)}), 500
     return jsonify({"filename": filename, "summary": summary, "citations": citations})
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     app.run(debug=True)
