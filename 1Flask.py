@@ -5,6 +5,7 @@ import google.generativeai as genai
 from PyPDF2 import PdfReader
 import docx
 
+
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
@@ -12,9 +13,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Google API Setup ----------------
 # ⚡ Directly put your API key here
-GOOGLE_API_KEY = "AIzaSyBaljQZjcjUKUwVbT0tSody9AITPU429mc"  # <--- Replace with your real API key
+GOOGLE_API_KEY = "AIzaSyBaljQZjcjUKUwVbT0tSody9AITPU429mc" 
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash")
+
 
 # ---------------- Helper Functions ----------------
 def extract_text_from_pdf(file_path):
@@ -45,7 +47,28 @@ def extract_citations(text):
     return list(set(citations_apa + citations_num))
 
 def summarize_with_gemini(text):
-    prompt = f"Summarize the following text in a clear, step-by-step way:\n\n{text}"
+    prompt = f'''Task: Summarize the following document into clear, concise bullet points. The document may be in PDF, DOCX, or TXT format.
+
+Requirements:
+
+Summarize all key information without losing meaning.
+
+Present the summary directly in bullet points, jumping straight to them.
+
+Include citations in author-year style at the end of each bullet where relevant.
+
+Normalize/format citations consistently, even if the original text is inconsistent.
+
+Ensure the summary is concise, refined, and usable for general purposes.
+
+Output format:
+
+Bullet points for key information.
+
+Citations included at the end of each bullet in parentheses (Author, Year).
+
+Avoid extra explanations or introductions.\n\n{text}'''
+    
     response = model.generate_content(prompt)
     return response.text if response else "Error: No response from Gemini."
 
